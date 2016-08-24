@@ -86,9 +86,7 @@ class GulpPlugin(snapcraft.BasePlugin):
         self._nodejs_tar.provision(
             self._npm_dir, clean_target=False, keep_tarball=True)
 
-        env = os.environ.copy()
-        env['PATH'] = '{}:{}'.format(
-            os.path.join(self._npm_dir, 'bin'), env['PATH'])
+        env = self._get_env()
         self.run(['npm', 'install', '-g', 'gulp-cli'], env=env)
         if os.path.exists(os.path.join(self.builddir, 'package.json')):
             self.run(['npm', 'install', '--only-development'], env=env)        
@@ -105,4 +103,10 @@ class GulpPlugin(snapcraft.BasePlugin):
 
         self.run([
             os.path.join(self._npm_dir, 'bin', 'gulp')] +
-            self.options.gulp_tasks, env=env)
+            self.options.gulp_tasks, env=self._get_env())
+
+    def _get_env(self):
+        env = os.environ.copy()
+        env['PATH'] = '{}:{}'.format(
+            os.path.join(self._npm_dir, 'bin'), env['PATH'])
+        return env
